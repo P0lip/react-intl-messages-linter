@@ -1,0 +1,25 @@
+{
+  "extends": "airbnb-base",
+  "env": {
+    "jest": true
+  },
+  "rules": {
+    "no-param-reassign": "warn",
+    "function-paren-newline": "off",
+    "no-restricted-syntax": "off",
+    "import/prefer-default-export": "off"
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [
+          ".js"
+        ],
+        "moduleDirectory": [
+          "node_modules",
+          "."
+        ]
+      }
+    }
+  }
+}

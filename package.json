@@ -1,0 +1,79 @@
+{
+  "name": "react-intl-messages-linter",
+  "version": "0.0.0",
+  "description": "Lint react-intl messages used in your React components.",
+  "keywords": [
+    "react",
+    "react-intl",
+    "linting",
+    "linter",
+    "react-intl-messages-linter",
+    "intl"
+  ],
+  "homepage": "https://github.com/P0lip/react-intl-messages-linter/",
+  "bugs": {
+    "url": "https://github.com/P0lip/react-intl-messages-linter/issues"
+  },
+  "engines": {
+    "node": ">=8.9.4"
+  },
+  "bin": {
+    "lint-react-intl-messages": "bin/index.js"
+  },
+  "license": "MIT",
+  "author": "P0lip",
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/P0lip/react-intl-messages-linter.git"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "lint": "eslint --cache --cache-location .cache/ src/ test/",
+    "test": "jest --cache --coverage",
+    "prepublish": "yarn lint && yarn test && yarn build"
+  },
+  "dependencies": {
+    "acorn": "^5.5.3",
+    "acorn-class-fields": "0.1.2",
+    "acorn-dynamic-import": "3.0.0",
+    "acorn-jsx": "^4.1.1",
+    "acorn-static-class-property-initializer": "1.0.0",
+    "ast-types": "0.11.3",
+    "chalk": "2.3.2",
+    "enhanced-resolve": "4.0.0",
+    "escodegen": "1.9.1",
+    "glob": "7.1.2",
+    "lodash.has": "4.5.2",
+    "yargs": "11.0.0"
+  },
+  "devDependencies": {
+    "babel-plugin-dynamic-import-node": "1.2.0",
+    "babel-plugin-transform-object-rest-spread": "6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.19.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.9.0",
+    "jest": "22.4.2",
+    "rollup": "^0.57.1",
+    "rollup-plugin-babel": "^3.0.3",
+    "rollup-plugin-hashbang": "1.0.1"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/*.js"
+    ],
+    "cacheDirectory": ".cache/",
+    "modulePaths": [
+      "<rootDir>"
+    ],
+    "moduleFileExtensions": [
+      "js"
+    ],
+    "testEnvironment": "node",
+    "setupTestFrameworkScriptFile": "./setupTests.js"
+  }
+}

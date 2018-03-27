@@ -18,15 +18,19 @@ export default (resolverOpts) => {
   const resolveContext = {};
   const resolveFile = util.promisify(myResolver.resolve);
 
-  return async (source, filename) => readFile(
-    await resolveFile.call(
+  return async (source, filename) => {
+    const filepath = await resolveFile.call(
       myResolver,
       {},
       filename.replace(path.basename(filename), ''),
       source,
       resolveContext,
-    ),
-    'utf-8',
-  );
+    );
+
+    return {
+      filepath,
+      content: await readFile(filepath, 'utf-8'),
+    };
+  };
 };
 

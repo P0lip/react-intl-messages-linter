@@ -1,19 +1,14 @@
-describe('check-react-intl-messages', () => {
-  const { error } = console;
-
+describe('react-intl-messages-linter', () => {
   beforeAll(() => {
     jest.mock('src/cli');
-    console.error = jest.fn();
   });
 
   beforeEach(() => {
     jest.unmock('src/validator');
-    console.error.mockClear();
   });
 
   afterAll(() => {
     jest.unmock('src/cli');
-    console.error = error;
   });
 
   test('runs validator', async () => {
@@ -24,17 +19,19 @@ describe('check-react-intl-messages', () => {
   });
 
   test('handles any error', async (done) => {
-    expect(console.error).not.toHaveBeenCalled();
     jest.mock('src/validator', () => ({
-       default() {
-         throw new Error();
-       },
-     }));
+      default() {
+        throw new Error();
+      },
+    }));
     jest.resetModules();
+    jest.mock('src/console');
+    const { default: debug } = await import('src/console');
+    expect(debug.error).not.toHaveBeenCalled();
     await import('src/index');
     setTimeout(() => {
-      expect(console.error).toHaveBeenCalled();
+      expect(debug.error).toHaveBeenCalled();
       done();
     }, 4);
-   });
+  });
 });

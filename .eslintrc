@@ -1,13 +1,19 @@
 {
+  "parser": "babel-eslint",
   "extends": "airbnb-base",
   "env": {
     "jest": true
   },
+  "plugins": [
+     "wyze"
+  ],
   "rules": {
     "no-param-reassign": "warn",
     "function-paren-newline": "off",
     "no-restricted-syntax": "off",
-    "import/prefer-default-export": "off"
+    "class-methods-use-this": "off",
+    "import/prefer-default-export": "off",
+    "import/no-dynamic-require": "warn"
   },
   "settings": {
     "import/resolver": {

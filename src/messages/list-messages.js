@@ -1,11 +1,12 @@
 import vm from 'vm';
 import escodegen from 'escodegen';
-import parse from './parse-jsx';
+import parse from '../parser';
 import defineMessages from './define-messages';
 import {
-  getMessagesExport,
-  isDefineMessagesImport, rewriteComputedMessages,
-} from './ast-utils';
+  getMessagesDefinitions,
+  isDefineMessagesImport,
+  rewriteComputedMessages,
+} from '../ast/utils';
 
 const context = {
   allMessages: new Set(),
@@ -16,12 +17,14 @@ const context = {
 
 vm.createContext(context);
 
-export default (code) => {
+const seenSources = {};
+export default (code, source) => {
+  if (source in seenSources) return seenSources[source];
   const ast = parse(code, {
     sourceType: 'module',
     ecmaVersion: 9,
   });
-  const hasMessages = ast.body.some(getMessagesExport);
+  const hasMessages = ast.body.some(getMessagesDefinitions);
   if (!hasMessages) return null;
 
   const importIndex = ast.body.findIndex(isDefineMessagesImport);
@@ -33,9 +36,9 @@ export default (code) => {
   }
 
   ast.body.forEach((node, i) => {
-    const messages = getMessagesExport(node);
+    const messages = getMessagesDefinitions(node);
     if (messages !== null) {
-      const [wrapped] = parse('defineMessages(null)').body;
+      const [wrapped] = parse('defineMessages(null, false)').body;
       rewriteComputedMessages(messages);
       wrapped.expression.arguments[0] = messages;
       ast.body[i] = wrapped;
@@ -45,7 +48,9 @@ export default (code) => {
   });
 
   try {
-    return vm.runInContext(escodegen.generate(ast), context);
+    const result = vm.runInContext(escodegen.generate(ast), context);
+    seenSources[source] = result;
+    return result;
   } catch (ex) {
     return ex;
   }

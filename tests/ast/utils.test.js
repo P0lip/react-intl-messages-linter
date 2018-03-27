@@ -1,11 +1,11 @@
-import parse from 'src/parse-jsx';
+import parse from 'src/parser';
 import {
-  getMessagesExport,
+  getMessagesDefinitions,
   isMessageImportSpecifier,
   isDefineMessagesImport,
-} from 'src/ast-utils';
+} from 'src/ast/utils';
 
-describe('AST Utils', () => {
+describe('ast/utils', () => {
   describe('isDefineMessagesImport', () => {
     test('returns true if valid import is found', () => {
       expect(isDefineMessagesImport(parse(
@@ -23,17 +23,17 @@ describe('AST Utils', () => {
     });
   });
 
-  describe('getMessagesExport', () => {
+  describe('getMessagesDefinitions', () => {
     test('lists messages', async () => {
       const fixture = parse(await global.getFixture('dummy-component/messages.js'));
-      expect(getMessagesExport(fixture)).toEqual(
+      expect(getMessagesDefinitions(fixture)).toEqual(
         fixture.body[1].declaration.arguments[0],
       );
     });
 
     test('lists nested messages', async () => {
-      const fixture = parse(await global.getFixture('weird-messages.js'));
-      expect(getMessagesExport(fixture)).toEqual(
+      const fixture = parse(await global.getFixture('messages/nested-messages.js'));
+      expect(getMessagesDefinitions(fixture)).toEqual(
         fixture.body[0].declaration,
       );
     });

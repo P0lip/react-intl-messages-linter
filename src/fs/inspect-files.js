@@ -1,24 +1,27 @@
 import util from 'util';
 import fs from 'fs';
-import path from 'path';
-import { getMessageImportPaths } from './ast-utils';
-import listMessages from './list-messages';
-import getMessages from './sandbox';
+import { getMessageImportPaths } from '../ast/utils';
+import listUsage from '../messages/list-usage';
+import listMessages from '../messages/list-messages';
+import { FileError, MissingImports, ParsingError } from '../errors';
 
 const glob = util.promisify(require('glob'));
 
 const readFile = util.promisify(fs.readFile);
 
-export default async ({ searchIn, resolver }) => {
-  const files = (await glob('**/*.js{x,}', {
-    cwd: searchIn,
-    ignore: [
-      'node_modules',
-      '**/*.test.js',
-      '**/*messages.js',
-      '*messages.js',
-    ],
-  })).map(filename => path.resolve(searchIn, filename));
+export default async ({
+  cwd,
+  ignore,
+  pattern,
+  resolver,
+}) => {
+  const files = (await glob(pattern, {
+    absolute: true,
+    cwd,
+    ignore,
+    nodir: true,
+    nocase: true,
+  }));
 
   const cases = [];
 
@@ -29,21 +32,20 @@ export default async ({ searchIn, resolver }) => {
       filename,
       messages,
       imports: {},
-      missingImports: false,
-      parsingError: null,
-      fileError: null,
+      error: null,
     };
     const importPaths = [];
     try {
       importPaths.push(...getMessageImportPaths(code));
-      messages.push(...listMessages(code));
+      messages.push(...listUsage(code));
     } catch (ex) {
-      singleCase.parsingError = ex;
+      singleCase.error = new ParsingError(ex.message);
       cases.push(singleCase);
+      return;
     }
 
     if (messages.length > 0 && !importPaths.length) {
-      singleCase.missingImports = true;
+      singleCase.error = new MissingImports();
       cases.push(singleCase);
       return;
     }
@@ -53,12 +55,16 @@ export default async ({ searchIn, resolver }) => {
       try {
         await Promise.all(importPaths.map(
           async ({ name, source }) => {
-            singleCase.imports[name] = getMessages(await resolver(source, filename));
+            const { filepath, content } = await resolver(source, filename);
+            singleCase.imports[name] = listMessages(
+              content,
+              filepath,
+            );
           },
         ));
       } catch (ex) {
         singleCase.imports = {};
-        singleCase.fileError = ex;
+        singleCase.error = new FileError(ex.message);
       }
     }
   }));

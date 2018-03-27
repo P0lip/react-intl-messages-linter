@@ -1,8 +1,8 @@
-import defineMessages from 'src/define-messages';
+import defineMessages from 'src/messages/define-messages';
 import escodegen from 'escodegen';
 import vm from 'vm';
 
-describe('defineMessages', () => {
+describe('messages/define-messages', () => {
   test('ast should be exported', () => {
     expect(defineMessages.type).toBe('FunctionDeclaration');
   });
@@ -10,10 +10,8 @@ describe('defineMessages', () => {
   test('ast can be consumed by escodegen', () => {
     expect(escodegen.generate(defineMessages)).toBeTruthy();
     expect(
-      escodegen.generate(defineMessages)
-        .split('\n')[0]
-        .startsWith('function defineMessages(messages) {'),
-    ).toBe(true);
+      escodegen.generate(defineMessages).split('\n')[0],
+    ).toMatchSnapshot();
   });
 
   test('defineMessages should store messages', () => {
@@ -35,28 +33,25 @@ describe('defineMessages', () => {
 
     vm.createContext(context);
     vm.runInContext(escodegen.generate(defineMessages), context);
-    try {
-      vm.runInContext(
-            'defineMessages({ test: { Foo: { id: \'test\', defaultMessage: \'\' } }})',
-            context,
-          )
-    } catch (Ex) {
-      console.error(Ex)
-    }
-    expect(vm.runInContext(
+    vm.runInContext(
       'defineMessages({ test: { Foo: { id: \'test\', defaultMessage: \'\' } }})',
+      context,
+    );
+
+    expect(vm.runInContext(
+      'defineMessages({ test: { Foo: { id: \'test-2\', defaultMessage: \'\' } }})',
       context,
     )).toEqual({
       test: {
         Foo: {
-          id: 'test',
+          id: 'test-2',
           defaultMessage: '',
         },
       },
     });
   });
 
-  xtest('defineMessages should throw error if duplicated ID is encountered', () => {
+  test('defineMessages should throw error if duplicated ID is encountered', () => {
     const context = {
       allMessages: new Set(),
     };

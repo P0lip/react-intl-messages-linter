@@ -1,5 +1,5 @@
 import messages from './messages';
-import commonMessages from '../common-messages';
+import commonMessages from '../messages/common-messages';
 
 export default ({ text, open, msg }) => (
   <div>
@@ -10,7 +10,7 @@ export default ({ text, open, msg }) => (
         {intl.formatMessage(commonMessages.Alert)}
       </div>
     )}
-    {messages[msg]}
-    {messages['safeAccess']}
+    {formatMessage(messages[msg])}
+    {formatMessage(messages['safeAccess'])}
   </div>
 )

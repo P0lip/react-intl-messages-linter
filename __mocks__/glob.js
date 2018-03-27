@@ -17,7 +17,7 @@ Object.defineProperties(glob, {
     },
     set(value) {
       resolveWith.length = 0;
-      resolveWith.push(...value);
+      resolveWith.push(...value.map(global.getFixturePath));
       return true;
     },
   },

@@ -1,4 +1,4 @@
-import consts from './consts';
+import consts from '../consts';
 
 export default {
   [consts.TEST]: {
@@ -9,7 +9,7 @@ export default {
   },
   Baz: {
     [Foo]: {
-      id: 'foo_message'
+      id: 'foo_message',
     },
   },
 };

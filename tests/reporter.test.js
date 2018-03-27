@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import chalk from 'chalk';
 
 describe('Reporter', () => {
@@ -33,14 +34,14 @@ describe('Reporter', () => {
   });
 
   describe('#file', () => {
-    test('prints filename only when success/warn/error method was called', () => {
+    test('prints filename only when warn/error method was called', () => {
       const cwd = '/foo/bar/react-project';
       const relative = 'src/components/Common';
       const report = new Reporter({ cwd });
       console.log.mockClear();
       expect(console.log).not.toHaveBeenCalled();
       report.file(`${cwd}/${relative}`);
-      report.success({ });
+      report.warn({ });
       expect(console.log.mock.calls[1]).toEqual([`- ${relative}`]);
     });
 

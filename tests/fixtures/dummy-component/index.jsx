@@ -6,7 +6,7 @@ export default class {
   renderInfo = async () => {
     await import('test');
     return (
-      <div>{messages.baz}</div>
+      <div>{formatMessage(messages.baz)}</div>
     );
   };
 

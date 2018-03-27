@@ -13,11 +13,12 @@ export default {
   plugins: [
     babel({
       exclude: 'node_modules/**',
+      externalHelpers: true,
     }),
     hashbang(),
   ],
   acorn: {
     allowReserved: true,
-    ecmaVersion: 8,
+    ecmaVersion: 9,
   },
 };

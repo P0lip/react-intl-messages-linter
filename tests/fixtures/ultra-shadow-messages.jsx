@@ -1,5 +1,5 @@
 import messages from 'dynamic-messages/messages';
-import warningMessages from './common-messages';
+import warningMessages from './messages/common-messages';
 
 export default () => {
   {
@@ -8,8 +8,8 @@ export default () => {
 
   return (
     <Fragment>
-      {warningMessages.test}
-      <span>{messages.Foo}</span>
+      {formatMessage(warningMessages.Alert)}
+      <span>{formatMessage(messages.Foo)}</span>
     </Fragment>
   );
 };

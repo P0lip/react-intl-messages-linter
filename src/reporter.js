@@ -10,6 +10,10 @@ export default class Reporter {
     this.shouldWarn = !quiet;
     this.cwd = cwd;
     this.pending = '';
+    this.stats = {
+      warnings: 0,
+      errors: 0,
+    };
 
     log(
       chalk.yellow('Use with caution.'),
@@ -33,7 +37,6 @@ export default class Reporter {
   }
 
   success({ reason, message }) {
-    this.logFile();
     log(
       chalk.green(`${INDENTATION}${reason}`),
       message,
@@ -42,6 +45,7 @@ export default class Reporter {
 
   error({ reason, message }) {
     this.logFile();
+    this.stats.errors += 1;
     log(
       chalk.red(`${INDENTATION}${reason}`),
       message,
@@ -49,6 +53,7 @@ export default class Reporter {
   }
 
   warn({ reason, message }) {
+    this.stats.warnings += 1;
     if (this.shouldWarn) {
       this.logFile();
       log(

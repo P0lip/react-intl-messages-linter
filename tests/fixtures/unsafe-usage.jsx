@@ -1,7 +1,8 @@
-import messages from './common-messages';
+import messages from './messages/common-messages';
 
 export default ({ msg }) => (
   <div>
-    {messages[msg]}
+    {formatMessage(messages[msg])}
+    {messages}
   </div>
 )

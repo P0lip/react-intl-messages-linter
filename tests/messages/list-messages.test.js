@@ -3,7 +3,7 @@ describe('Sandbox', () => {
   let getStoredMessages;
   beforeEach(async (done) => {
     jest.resetModules();
-    ({ default: sandbox, getStoredMessages } = await import('src/sandbox'));
+    ({ default: sandbox, getStoredMessages } = await import('src/messages/list-messages'));
     done();
   });
 
@@ -31,29 +31,29 @@ describe('Sandbox', () => {
     jest.resetModules();
     jest.mock('vm');
     const vm = await import('vm');
-    const { default: localSandbox } = await import('src/sandbox');
+    const { default: localSandbox } = await import('src/messages/list-messages');
     const messages = await global.getFixture('dummy-component/messages.js');
     vm.runInContext.mockImplementation(() => {
       throw new Error();
     });
     expect(() => localSandbox(messages)).not.toThrow();
-    expect(vm.runInContext.mock.calls.length).toEqual(1)
+    expect(vm.runInContext.mock.calls.length).toEqual(1);
   });
 
   test('resolves imports', async () => {
-    const messages = await global.getFixture('import-messages.js');
-     expect(sandbox(messages)).toEqual({
-       '[consts.TEST]': {
-          id: 'yolo',
-       },
-       Foo: {
-         id: 'abc',
-       },
-       Baz: {
-         '[Foo]': {
-           id: 'foo_message'
-         },
-       },
-     });
+    const messages = await global.getFixture('messages/import-messages.js');
+    expect(sandbox(messages)).toEqual({
+      '[consts.TEST]': {
+        id: 'yolo',
+      },
+      Foo: {
+        id: 'abc',
+      },
+      Baz: {
+        '[Foo]': {
+          id: 'foo_message',
+        },
+      },
+    });
   });
 });

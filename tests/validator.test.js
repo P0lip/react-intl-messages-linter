@@ -3,30 +3,49 @@ import {
   NO_ERRORS,
   NO_MESSAGES_IMPORT,
   RESOLVING_ERROR,
-  UNDEFINED_MESSAGE,
   UNSAFE_USAGE,
+  PARSING_ERROR,
 } from 'src/consts';
-import { PARSING_ERROR } from '../src/consts';
-import Reporter from '../src/reporter';
 
 describe('Resolver', () => {
   let glob;
   let Reporter;
   let validate;
 
+  const formatMessage = jest.fn(require.requireActual('src/reporter').default.formatMessage);
+
+  const fns = {
+    file: jest.fn(),
+    error: jest.fn(),
+    success: jest.fn(),
+    warn: jest.fn(),
+    stats: {},
+  };
+
   beforeAll(async (done) => {
     jest.mock('glob');
     jest.mock('src/cli');
     jest.mock('src/reporter');
+    jest.doMock('src/reporter', () => {
+      const fn = jest.fn();
+      fn.formatMessage = formatMessage;
+      fn.mockImplementation(() => fns);
+      return fn;
+    });
     ({ default: validate } = await import('src/validator'));
-    ({ default: Reporter } = await import('src/reporter'));
-    Reporter.formatMessage = require.requireActual('src/reporter').default.formatMessage;
+    Reporter = await import('src/reporter');
     glob = await import('glob');
     done();
   });
 
-  beforeEach(() => {
+  afterEach(() => {
     Reporter.mockClear();
+    Object.values(fns).forEach((fn) => {
+      if (typeof fn === 'function') {
+        fn.mockClear();
+      }
+    });
+    formatMessage.mockClear();
     glob.shouldFail = false;
     glob.resolveWith = [];
   });
@@ -34,8 +53,7 @@ describe('Resolver', () => {
   test('handles IO errors', async () => {
     glob.shouldFail = true;
     await validate();
-    const ReporterInstance = Reporter.mock.instances[0];
-    expect(ReporterInstance.error).toHaveBeenCalledWith({
+    expect(fns.error).toHaveBeenCalledWith({
       message: glob.ERROR_MSG,
       reason: RESOLVING_ERROR,
     });
@@ -43,8 +61,7 @@ describe('Resolver', () => {
 
   test('reports success state', async () => {
     await validate();
-    const ReporterInstance = Reporter.mock.instances[0];
-    expect(ReporterInstance.success).toHaveBeenCalledWith({
+    expect(fns.success).toHaveBeenCalledWith({
       message: '',
       reason: NO_ERRORS,
     });
@@ -53,28 +70,26 @@ describe('Resolver', () => {
   test('reports filename', async () => {
     glob.resolveWith = [
       'missing-imports.jsx',
-      'invalid-syntax.js'
+      'syntax/invalid.js',
     ];
 
     await validate();
-    const ReporterInstance = Reporter.mock.instances[0];
-    expect(ReporterInstance.file).toHaveBeenCalledTimes(2);
-    expect(ReporterInstance.file.mock.calls).toEqual(expect.arrayContaining([
+    expect(fns.file).toHaveBeenCalledTimes(2);
+    expect(fns.file.mock.calls).toEqual(expect.arrayContaining([
       ...[
         ['missing-imports.jsx'],
-        ['invalid-syntax.js'],
+        ['syntax/invalid.js'],
       ].map(([name]) => [path.resolve(global.BASE_PATH, name)]),
     ]));
   });
 
   test('reports parsing error(s)', async () => {
     glob.resolveWith = [
-      'invalid-syntax.js'
+      'syntax/invalid.js',
     ];
 
     await validate();
-    const ReporterInstance = Reporter.mock.instances[0];
-    expect(ReporterInstance.error).toHaveBeenCalledWith({
+    expect(fns.error).toHaveBeenCalledWith({
       reason: PARSING_ERROR,
       message: expect.any(String),
     });
@@ -86,8 +101,7 @@ describe('Resolver', () => {
     ];
 
     await validate();
-    const ReporterInstance = Reporter.mock.instances[0];
-    expect(ReporterInstance.error).toHaveBeenCalledWith({
+    expect(fns.error).toHaveBeenCalledWith({
       reason: NO_MESSAGES_IMPORT,
       message: '',
     });
@@ -99,25 +113,14 @@ describe('Resolver', () => {
     ];
 
     await validate();
-    const ReporterInstance = Reporter.mock.instances[0];
-    expect(ReporterInstance.success).not.toHaveBeenCalled();
-    expect(ReporterInstance.warn).toHaveBeenCalledWith({
+    expect(fns.success).toHaveBeenCalledTimes(1);
+    expect(fns.success).toHaveBeenCalledWith({
+      message: '',
+      reason: NO_ERRORS,
+    });
+    expect(fns.warn).toHaveBeenCalledWith({
       reason: UNSAFE_USAGE,
-      message: expect.stringMatching(/messages[\[\].A-za-z]+\sat\s\d+:\d+/),
+      message: expect.stringMatching(/messages[[\].A-za-z]+\sat\s\d+:\d+/),
     });
   });
-
-  test('reports unsafe message usage', async () => {
-     glob.resolveWith = [
-       'unsafe-usage.jsx',
-     ];
-
-     await validate();
-     const ReporterInstance = Reporter.mock.instances[0];
-     expect(ReporterInstance.success).not.toHaveBeenCalled();
-     expect(ReporterInstance.warn).toHaveBeenCalledWith({
-       reason: UNSAFE_USAGE,
-       message: expect.stringMatching(/messages[.\[\]A-za-z]+\sat\s\d+:\d+/),
-     });
-   });
 });

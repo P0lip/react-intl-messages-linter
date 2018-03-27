@@ -1,6 +1,6 @@
 {
   "name": "react-intl-messages-linter",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Lint react-intl messages used in your React components.",
   "keywords": [
     "react",
@@ -15,7 +15,7 @@
     "url": "https://github.com/P0lip/react-intl-messages-linter/issues"
   },
   "engines": {
-    "node": ">=8.9.4"
+    "node": ">=6"
   },
   "bin": {
     "lint-react-intl-messages": "bin/index.js"
@@ -31,8 +31,8 @@
     "url": "git+https://github.com/P0lip/react-intl-messages-linter.git"
   },
   "scripts": {
-    "build": "rollup -c",
-    "lint": "eslint --cache --cache-location .cache/ src/ test/",
+    "build": "NODE_ENV=production rollup -c",
+    "lint": "eslint --cache --cache-location .cache/ src/ tests/",
     "test": "jest --cache --coverage",
     "prepublish": "yarn lint && yarn test && yarn build"
   },
@@ -51,20 +51,30 @@
     "yargs": "11.0.0"
   },
   "devDependencies": {
+    "@babel/core": "7.0.0-beta.44",
+    "@babel/plugin-external-helpers": "7.0.0-beta.44",
+    "@babel/plugin-proposal-object-rest-spread": "7.0.0-beta.44",
+    "@babel/plugin-syntax-dynamic-import": "7.0.0-beta.44",
+    "@babel/plugin-transform-modules-commonjs": "7.0.0-beta.44",
+    "@babel/preset-env": "7.0.0-beta.44",
+    "babel-core": "^7.0.0-0",
+    "babel-eslint": "8.2.2",
+    "babel-jest": "22.4.3",
     "babel-plugin-dynamic-import-node": "1.2.0",
-    "babel-plugin-transform-object-rest-spread": "6.26.0",
-    "babel-preset-env": "^1.6.1",
-    "eslint": "^4.19.0",
+    "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
-    "eslint-plugin-import": "^2.9.0",
-    "jest": "22.4.2",
+    "eslint-plugin-import": "^2.10.0",
+    "eslint-plugin-wyze": "3.3.1",
+    "jest": "22.4.3",
+    "regenerator-runtime": "0.11.1",
     "rollup": "^0.57.1",
-    "rollup-plugin-babel": "^3.0.3",
+    "rollup-plugin-babel": "4.0.0-beta.2",
     "rollup-plugin-hashbang": "1.0.1"
   },
   "jest": {
+    "automock": false,
     "collectCoverageFrom": [
-      "src/*.js"
+      "src/**/*.js"
     ],
     "cacheDirectory": ".cache/",
     "modulePaths": [

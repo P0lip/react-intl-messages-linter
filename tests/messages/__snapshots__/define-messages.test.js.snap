@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`messages/define-messages ast can be consumed by escodegen 1`] = `"function defineMessages(messages, validateDefaultMessage = true) {"`;

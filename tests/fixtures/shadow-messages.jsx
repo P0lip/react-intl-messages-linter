@@ -5,7 +5,7 @@ export default () => {
   return (
     <Fragment>
       {warningMessages[0]}
-      <span>{messages.Foo}</span>
+      <span>{intl.formatMessage(messages.Foo)}</span>
     </Fragment>
   );
 };

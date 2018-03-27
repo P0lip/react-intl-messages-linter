@@ -1,6 +1,4 @@
-import {
-  isMessagesShape,
-} from 'src/utils';
+import { isMessagesShape } from 'src/messages/utils';
 
 const messages = {
   Foo: {
@@ -31,7 +29,7 @@ const nestedMessages = {
 };
 
 describe('Utils', () => {
-  describe('isMessagesShape', () => {
+  describe('isValidMessagesShape', () => {
     test('validates shallow messages correctly', () => {
       expect(isMessagesShape(messages)).toBe(true);
     });

@@ -1,6 +1,6 @@
 import has from 'lodash.has';
 import setup from './cli';
-import listFiles from './list-files';
+import listFiles from './fs/inspect-files';
 import Reporter from './reporter';
 import {
   NO_ERRORS,
@@ -10,6 +10,10 @@ import {
   UNDEFINED_MESSAGE,
   UNSAFE_USAGE,
 } from './consts';
+import {
+  ParsingError,
+  MissingImports,
+} from './errors';
 
 export default async () => {
   const report = new Reporter(setup);
@@ -25,45 +29,51 @@ export default async () => {
     return;
   }
 
-  if (!cases.length) {
-    report.success({
-      reason: NO_ERRORS,
-      message: '',
-    });
-  } else {
+  if (cases.length) {
     cases.forEach(({
       filename,
+      error,
       imports,
       messages,
-      missingImports,
-      parsingError,
     }) => {
       report.file(filename);
-      if (parsingError !== null) {
-        report.error({
-          reason: PARSING_ERROR,
-          message: parsingError.message,
-        });
-      } else if (missingImports) {
-        report.error({
-          reason: NO_MESSAGES_IMPORT,
-          message: '',
-        });
-      } else if (messages.length) {
-        messages.forEach((message) => {
-          if (!message.safe) {
-            report.warn({
-              reason: UNSAFE_USAGE,
-              message: Reporter.formatMessage(message),
-            });
-          } else if (!has(imports, message.name)) {
-            report.error({
-              reason: UNDEFINED_MESSAGE,
-              message: Reporter.formatMessage(message),
+      switch (error !== null ? error.constructor : null) {
+        case ParsingError:
+          report.error({
+            reason: PARSING_ERROR,
+            message: error.message,
+          });
+          break;
+        case MissingImports:
+          report.error({
+            reason: NO_MESSAGES_IMPORT,
+            message: '',
+          });
+          break;
+        default:
+          if (messages.length) {
+            messages.forEach((message) => {
+              if (!message.safe) {
+                report.warn({
+                  reason: UNSAFE_USAGE,
+                  message: Reporter.formatMessage(message),
+                });
+              } else if (!message.computed && !has(imports, message.name)) {
+                report.error({
+                  reason: UNDEFINED_MESSAGE,
+                  message: Reporter.formatMessage(message),
+                });
+              }
             });
           }
-        });
       }
+    });
+  }
+
+  if (!report.stats.errors) {
+    report.success({
+      reason: NO_ERRORS,
+      message: !report.shouldWarn && report.stats.warnings ? '...but some warnings are hidden' : '',
     });
   }
 };
